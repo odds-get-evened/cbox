@@ -20,9 +20,9 @@ LDFLAGS=-lstdc++ -lglfw3 -lopengl32 -lgdi32 -luser32 -lkernel32
 # in this section, you list files that are part of the project.
 # if you add/change names of source files, here is where you
 # edit the Makefile (separated by a space)
-SOURCES=src/prac3.cpp
+SOURCES=./main.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
-TARGET=dist/cheet
+TARGET=./dist/glstuff
 
 # the first target defined in the Makefile is the one
 # used when make is invoked with no argument. given the
@@ -31,6 +31,9 @@ TARGET=dist/cheet
 # OBJECTS.
 $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) $(INC_PATHS) -o $@ $^ $(LDFLAGS)
+
+run:
+	$(TARGET)
 
 # PHONY means not a real TARGET (it doesn't build anything)
 # the PHONY target "clean" is used to remove all compiled OBJECTS
