@@ -50,6 +50,15 @@ void mouse_listener(GLFWwindow *win, int btn, int action, int mods) {
     }
 }
 
+void cursor_listener(GLFWwindow *win, double xpos, double ypos) {
+    cout << xpos << ", " << ypos << endl;
+}
+
+void shutdown_process(GLFWwindow *win) {
+    glfwDestroyWindow(win);
+    glfwTerminate();
+}
+
 void do_gl() {
     // initialize GLFW
     if(!glfwInit()) {
@@ -59,6 +68,7 @@ void do_gl() {
 
     // don't allow window resizing
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    
 
     // create a window
     GLFWwindow *win = glfwCreateWindow(640, 480, "my window", NULL, NULL);
@@ -74,8 +84,9 @@ void do_gl() {
     // key listener
     glfwSetKeyCallback(win, key_listener);
 
-    // mouse listener
+    // mouse listeners
     glfwSetMouseButtonCallback(win, mouse_listener);
+    glfwSetCursorPosCallback(win, cursor_listener);
 
     glViewport(0, 0, 640, 480);
 
@@ -86,13 +97,13 @@ void do_gl() {
         // draw a line
         drawLine(-1.0f, -1.0f, 1.0f, 1.0f);
         // draw a circle
-        drawCircle(0.5f, 0.5f, 0.2f);
+        drawCircle(0.0f, 0.0f, 0.05f);
 
         glfwSwapBuffers(win);
         glfwPollEvents();
     }
 
-    glfwTerminate();
+    shutdown_process(win);
 }
 
 int main(int argc, char *argv[]) {
