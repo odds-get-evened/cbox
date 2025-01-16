@@ -15,9 +15,13 @@ CFLAGS=-g -Wall -O0
 # LDFLAGS sets flags for linker
 # -lm		says to link in libm (the math library)
 #####
-# misc. stuff
-# -lsqlite3
-LDFLAGS=-lstdc++ -lglfw3 -lopengl32 -lgdi32 -luser32 -lkernel32
+# requirements:
+# -lstdc++	links in the standard c++ library
+# -luser32	links in the user32 library
+# -lkernel32	links in the kernel32 library
+# -lz		links in the zlib library
+# -lmlpack links in the mlpack library (machine learning library)
+LDFLAGS=-lstdc++ -luser32 -lkernel32 -lz -lmlpack
 
 # in this section, you list files that are part of the project.
 # if you add/change names of source files, here is where you

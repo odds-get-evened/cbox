@@ -104,6 +104,7 @@ namespace odds {
                 file.read(&txt[0], txt_size);
                 tbl[id] = Message{id, txt};
             }
+            file.close();
         } else {
             cerr << "unable to open file for reading. " << fname << endl;
         }
@@ -115,11 +116,6 @@ namespace odds {
 int main(int argc, char *argv[]) {
     odds::MsgTbl mt = odds::create_msg_table();
 
-    if(odds::add_msg(mt, 0x08, "B00P")) {
-        cout << "message added successfully." << endl;
-        odds::print_table(mt);
-    }
-
     // where are we saving this file?
     fs::path dest_dir = "C:/Users/chris/.databox";
     fs::path bin_file = dest_dir / "msg_tbl.bin";
@@ -129,13 +125,30 @@ int main(int argc, char *argv[]) {
         fs::create_directories(dest_dir);
     }
 
-    // save the message table to a binary file
+    // load the message table from a file if it exists
+    if(fs::exists(bin_file)) {
+        mt = odds::load_table(bin_file.string());
+    }
+
+    // check for command line arguments to add custom messages
+    if(argc == 3) {
+        int id = stoi(argv[1]);    // parse the ID as a hexidecimal number
+        string txt = argv[2];                   // message text
+
+        if(odds::add_msg(mt, id, txt)) {
+            cout << "message added successfully." << endl;
+        } else {
+            cout << "failed to add a message. ID must be in the range 0x06 to 0x0F." << endl;
+        }
+    }
+
+    // save the message table to the binary file.
     odds::save_table(mt, bin_file.string());
 
-    // load the message table from the binary file
-    odds::MsgTbl mt_loaded = odds::load_table(bin_file.string());
-    cout << "loaded message table: " << endl;
-    odds::print_table(mt_loaded);
+    // print the message table
+    cout << "current message table:" << endl;
+    odds::print_table(mt);
+
 
     return 0;
 }
