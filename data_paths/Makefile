@@ -1,3 +1,5 @@
+APP_NAME=data_paths
+VERSION=0.0.1
 # C++ compiler
 COMPILER=g++
 # include paths
@@ -13,17 +15,20 @@ CFLAGS=-g -Wall -O0
 # LDFLAGS sets flags for linker
 # -lm		says to link in libm (the math library)
 #####
-# misc. stuff
-# -lsqlite3	links in the sqlite3 library
-# -std=c99 use the C99 standard language definition
-LDFLAGS=-lstdc++ -lglfw3 -lopengl32 -lgdi32 -luser32 -lkernel32
+# requirements:
+# -lstdc++	links in the standard c++ library
+# -luser32	links in the user32 library
+# -lkernel32	links in the kernel32 library
+# -lz		links in the zlib library
+# -lmlpack links in the mlpack library (machine learning library)
+LDFLAGS=-lstdc++ -lz -lglfw3 -lopengl32 -lgdi32 -larmadillo -luser32 -lkernel32 -lglew32
 
 # in this section, you list files that are part of the project.
 # if you add/change names of source files, here is where you
 # edit the Makefile (separated by a space)
 SOURCES=./main.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
-TARGET=./dist/gl_stuff
+TARGET=./dist/$(APP_NAME)_$(VERSION)
 
 # the first target defined in the Makefile is the one
 # used when make is invoked with no argument. given the
@@ -41,4 +46,4 @@ run:
 .PHONY: clean
 
 clean:
-	@rm -f $(TARGET) $(OBJECTS) core
+	@rm -f $(TARGET) $(OBJECTS)

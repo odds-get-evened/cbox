@@ -1,3 +1,5 @@
+APP_NAME=msg_tbl
+VERSION=0.0.1
 # C++ compiler
 COMPILER=g++
 # include paths
@@ -14,8 +16,7 @@ CFLAGS=-g -Wall -O0
 # -lm		says to link in libm (the math library)
 #####
 # misc. stuff
-# -lsqlite3	links in the sqlite3 library
-# -std=c99 use the C99 standard language definition
+# -lsqlite3
 LDFLAGS=-lstdc++ -lglfw3 -lopengl32 -lgdi32 -luser32 -lkernel32
 
 # in this section, you list files that are part of the project.
@@ -23,7 +24,7 @@ LDFLAGS=-lstdc++ -lglfw3 -lopengl32 -lgdi32 -luser32 -lkernel32
 # edit the Makefile (separated by a space)
 SOURCES=./main.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
-TARGET=./dist/gl_stuff
+TARGET=./dist/$(APP_NAME)_$(VERSION)
 
 # the first target defined in the Makefile is the one
 # used when make is invoked with no argument. given the
@@ -41,4 +42,4 @@ run:
 .PHONY: clean
 
 clean:
-	@rm -f $(TARGET) $(OBJECTS) core
+	@rm -f $(TARGET) $(OBJECTS)
