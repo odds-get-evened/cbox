@@ -1,4 +1,8 @@
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include <iostream>
+#define _USE_MATH_DEFINES  // for some reason CONSTANTS won't pull in if this is not declared
+#include <cmath>
 #include <zlib.h>
 #include <cstdint>
 #include <random>
@@ -6,12 +10,28 @@
 #include <mlpack/core.hpp>
 #include <mlpack/methods/linear_regression/linear_regression.hpp>
 
+
 using namespace std;
 using namespace mlpack;
 
+void drawCircle(float centerX, float centerY, float radius) {
+    glColor3f(1, 0, 0);
+
+    glBegin(GL_POLYGON);
+    for(int i=0; i<360; i++) {
+        float angle = i * M_PI / 180.0f;
+        float x = centerX + radius * cos(angle);
+        float y = centerY + radius * sin(angle);
+
+        glVertex2f(x, y);
+    }
+    glEnd();
+}
+
 namespace odds {
     // define type for matrix of vectors
-    using MatrixVec = vector<vector<double>>;
+    // using MatrixVec = vector<vector<double>>;
+    typedef vector<vector<double>> MatrixVec;
 
     MatrixVec gen_rand_matrix(size_t len) {
         // seed random number generator
@@ -96,24 +116,127 @@ namespace odds {
 
         return new_mtx;
     }
-    
-    class InteCirc {
-        private:
-        uLong id;
-        
-        public:
-        InteCirc() {
-            id = crc32_hash(gen_rand_bytes(16));
+
+    void print_matrix(const vector<vector<double>> &mtx) {
+        for(const auto &vec : mtx) {
+            for(const auto &v : vec) {
+                cout << setw(10) << v << " ";
+            }
+            
+            cout << endl;
         }
-        uLong get_id() const { return id; }
+    }
+
+    class MatrixPlot {
+        private:
+        MatrixVec matrix;
+        GLFWwindow *window;
+        float angleX, angleY;
+        float lastX, lastY;
+        bool firstMouse;
+
+        static void mouse_cb(GLFWwindow *window, double xpos, double ypos) {
+            // get pointer to MatrixPlot object
+            MatrixPlot *plot = static_cast<MatrixPlot *>(glfwGetWindowUserPointer(window));
+
+            // check if left mouse button is pressed
+            if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+                // check if first mouse movement
+                if(plot->firstMouse) {
+                    plot->lastX = xpos;
+                    plot->lastY = ypos;
+                    plot->firstMouse = false;
+                }
+
+                float xoffset = xpos - plot->lastX;
+                // float yoffset = plot->lastY - ypos;
+                float yoffset = ypos - plot->lastY;
+                plot->lastX = xpos;
+                plot->lastY = ypos;
+
+                plot->angleX += yoffset * 0.1f;
+                plot->angleY += xoffset * 0.1f;
+            } else {
+                plot->firstMouse = true;        // reset firstMouse when button is released
+            }
+        }
+        public:
+        MatrixPlot(const MatrixVec &d) : matrix(d), window(nullptr), angleX(0.0f), angleY(0.0f), lastX(0.0f), lastY(0.0f), firstMouse(true) {}
+
+        void init() {
+            if(!glfwInit()) {
+                cerr << "failed to initialize GLFW" << endl;
+                exit(-1);
+            }
+
+            // set window non-resizeable
+            glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+            // create window
+            window = glfwCreateWindow(640, 480, "matrix plot", nullptr, nullptr);
+            if(!window) {
+                cerr << "failed to create window" << endl;
+                glfwTerminate();
+                exit(-1);
+            }
+
+            glfwMakeContextCurrent(window);
+            glfwSetWindowUserPointer(window, this);
+            glfwSetCursorPosCallback(window, this->mouse_cb);
+
+            // initialize GLEW
+            if(glewInit() != GLEW_OK) {
+                cerr << "failed to initialize GLEW" << endl;
+                exit(-1);
+            }
+
+            glEnable(GL_DEPTH_TEST);
+
+            glViewport(0, 0, 640, 480);
+
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
+            glMatrixMode(GL_MODELVIEW);
+        }
+
+        void run() {
+            this->init();
+
+            while(!glfwWindowShouldClose(window)) {
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+                glLoadIdentity();
+                glTranslatef(0.0f, 0.0f, -1.0f);
+                glRotatef(angleX, 1.0f, 0.0f, 0.0f);
+                glRotatef(angleY, 0.0f, 1.0f, 0.0f);
+
+                glPointSize(5.0f);
+                glColor3f(1.0f, 1.0f, 1.0f);
+
+                glBegin(GL_POINTS);
+                for(const auto &vec : matrix) {
+                    glVertex3d(vec[0], vec[1], vec[2]);
+                }
+                glEnd();
+
+                glfwSwapBuffers(window);
+                glfwPollEvents();
+            }
+
+            glfwDestroyWindow(window);
+            glfwTerminate();
+        }
     };
 }
 
 
 
 int main() {
-    odds::InteCirc ic;
-    cout << "InteCirc ID: " << hex << ic.get_id() << endl;
+    odds::MatrixVec mtx = odds::gen_rand_matrix(32);
+    odds::MatrixPlot plt(mtx);
+    odds::print_matrix(mtx);
+    plt.run();
 
     return 0;
 }

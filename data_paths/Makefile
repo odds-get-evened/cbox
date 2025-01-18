@@ -1,4 +1,4 @@
-APP_NAME=msg_tbl
+APP_NAME=data_paths
 VERSION=0.0.1
 # C++ compiler
 COMPILER=g++
@@ -21,7 +21,7 @@ CFLAGS=-g -Wall -O0
 # -lkernel32	links in the kernel32 library
 # -lz		links in the zlib library
 # -lmlpack links in the mlpack library (machine learning library)
-LDFLAGS=-lstdc++ -luser32 -lkernel32 -lz -lmlpack
+LDFLAGS=-lstdc++ -lz -lglfw3 -lopengl32 -lgdi32 -larmadillo -luser32 -lkernel32 -lglew32
 
 # in this section, you list files that are part of the project.
 # if you add/change names of source files, here is where you

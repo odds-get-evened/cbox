@@ -14,8 +14,9 @@ CFLAGS=-g -Wall -O0
 # -lm		says to link in libm (the math library)
 #####
 # misc. stuff
-# -lsqlite3
-LDFLAGS=-lstdc++ -lglfw3 -lopengl32 -lgdi32 -luser32 -lkernel32 -std=c99
+# -lsqlite3	links in the sqlite3 library
+# -std=c99 use the C99 standard language definition
+LDFLAGS=-lstdc++ -lglfw3 -lopengl32 -lgdi32 -luser32 -lkernel32
 
 # in this section, you list files that are part of the project.
 # if you add/change names of source files, here is where you
