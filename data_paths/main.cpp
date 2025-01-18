@@ -90,16 +90,23 @@ namespace odds {
         return lr;
     }
 
+    /**
+     * @brief Predict new values using a trained linear regression model
+     * @param lr LinearRegression object
+     * @param len Number of new values to predict
+     */
     vector<vector<double>> predict_new_matrix(LinearRegression &lr, size_t len) {
+        // seed random number generator
         random_device rd;
         mt19937 gen(rd());
+        // pick random numbers between -1 and 1
         uniform_real_distribution<double> dist(-1.0, 1.0);
 
+        // create matrix to store new data
         vector<vector<double>> new_mtx(len, vector<double>(3));
 
         // fill matrix with random numbers
         arma::mat X(len, 2);
-
         for(size_t i=0; i<len; i++) {
             new_mtx[i][0] = dist(gen);
             new_mtx[i][1] = dist(gen);
@@ -107,9 +114,11 @@ namespace odds {
             X(i, 1) = new_mtx[i][1];
         }
 
+        // predict new values
         arma::rowvec predictions;
         lr.Predict(X, predictions);
 
+        // fill new matrix with predictions
         for(size_t i=0; i<len; i++) {
             new_mtx[i][2] = predictions(i);
         }
