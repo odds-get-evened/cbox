@@ -239,8 +239,6 @@ namespace odds {
     };
 }
 
-
-
 int main() {
     odds::MatrixVec mtx = odds::gen_rand_matrix(32);
     odds::MatrixPlot plt(mtx);
