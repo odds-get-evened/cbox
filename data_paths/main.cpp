@@ -28,6 +28,8 @@ void drawCircle(float centerX, float centerY, float radius) {
     glEnd();
 }
 
+const size_t MATRIX_SIZE = 32;
+
 namespace odds {
     // define type for matrix of vectors
     // using MatrixVec = vector<vector<double>>;
@@ -209,6 +211,17 @@ namespace odds {
             glMatrixMode(GL_MODELVIEW);
         }
 
+        /**
+         * using machine learning to rebuild the matrix
+         */
+        void rebuild() {
+            // train the model
+            LinearRegression lr = train_model(matrix);
+            MatrixVec new_vec = predict_new_matrix(lr, sizeof(matrix));
+            print_matrix(matrix);
+            print_matrix(new_vec);
+        }
+
         void run() {
             this->init();
 
@@ -229,6 +242,8 @@ namespace odds {
                 }
                 glEnd();
 
+                rebuild();
+
                 glfwSwapBuffers(window);
                 glfwPollEvents();
             }
@@ -240,7 +255,7 @@ namespace odds {
 }
 
 int main() {
-    odds::MatrixVec mtx = odds::gen_rand_matrix(32);
+    odds::MatrixVec mtx = odds::gen_rand_matrix(MATRIX_SIZE);
     odds::MatrixPlot plt(mtx);
     odds::print_matrix(mtx);
     plt.run();
