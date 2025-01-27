@@ -1,4 +1,4 @@
-APP_NAME=mimichip
+APP_NAME=data_vecs
 VERSION=0.0.1
 # C++ compiler
 COMPILER=g++
@@ -26,9 +26,9 @@ LDFLAGS=-lstdc++ -luser32 -lkernel32
 # in this section, you list files that are part of the project.
 # if you add/change names of source files, here is where you
 # edit the Makefile (separated by a space)
-SOURCES=main.cpp
+SOURCES=./main.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
-TARGET=dist/$(APP_NAME)_$(VERSION)
+TARGET=./dist/$(APP_NAME)_$(VERSION)
 
 # the first target defined in the Makefile is the one
 # used when make is invoked with no argument. given the
