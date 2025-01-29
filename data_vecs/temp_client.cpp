@@ -1,11 +1,10 @@
 #include <iostream>
-#include <random>
-#include <vector>
-#include <thread>
-#include <chrono>
-#include <boost/asio.hpp>
+#include "inc/odds.hpp"
 
 using namespace std;
-using namespace boost::asio;
 
-using ip::tcp;
+int main(int argc, char *argv[]) {
+    
+
+    return 0;
+}
