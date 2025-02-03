@@ -1,17 +1,11 @@
-#include <iostream>
 #include "inc/odds.hpp"
 
-using namespace std;
-
 int main(int argc, char *argv[]) {
-    double rng[] = {-21.0, 95.0};
-    double inc_rng[] = {-1.0, 1.0};
-    vector<double> a = odds::gen_rand_temps(48, rng, inc_rng);
+    double r1[2] = {-21.0, 98.0};
+    double i1[2] = {-1.0, 1.0};
+    vector<double> vec1 = odds::gen_rand_temps(10, r1, i1);
 
-    for(int i=0; i<a.size(); i++) {
-        cout << a.at(i) << " ";
-    }
-    cout << endl;
+    
 
     return 0;
 }

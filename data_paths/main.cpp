@@ -35,6 +35,20 @@ namespace odds {
     // using MatrixVec = vector<vector<double>>;
     typedef vector<vector<double>> MatrixVec;
 
+    bool is_col_len_eq(const vector<vector<double>> &mtx) {
+        // 0 is equal to 0
+        if(mtx.empty()) return true;
+
+        // establish forst row length
+        size_t col_len = mtx[0].size();
+
+        for(const auto &row : mtx) {
+            if(row.size() != col_len) return false;
+        }
+
+        return true;
+    }
+
     MatrixVec gen_rand_matrix(size_t len) {
         // seed random number generator
         random_device rd;
@@ -75,8 +89,18 @@ namespace odds {
     }
 
     LinearRegression train_model(const vector<vector<double>> &d) {
+        /*
+        ensures all inner vectors lengths are equal
+        so we can select anyone for column length in
+        training.
+        */
+        bool eq_cols = is_col_len_eq(d);
+        if(!eq_cols) exit(-1);
+
+        // since all are equal just grab column length from first row.
+        size_t n_cols = d[0].size();
         // create matrix from data
-        arma::mat X(d.size(), 2);
+        arma::mat X(d.size(), n_cols);
         // create vector from data
         arma::rowvec y(d.size());
 
@@ -211,17 +235,6 @@ namespace odds {
             glMatrixMode(GL_MODELVIEW);
         }
 
-        /**
-         * using machine learning to rebuild the matrix
-         */
-        void rebuild() {
-            // train the model
-            LinearRegression lr = train_model(matrix);
-            MatrixVec new_vec = predict_new_matrix(lr, sizeof(matrix));
-            print_matrix(matrix);
-            print_matrix(new_vec);
-        }
-
         void run() {
             this->init();
 
@@ -242,8 +255,6 @@ namespace odds {
                 }
                 glEnd();
 
-                rebuild();
-
                 glfwSwapBuffers(window);
                 glfwPollEvents();
             }
@@ -256,6 +267,7 @@ namespace odds {
 
 int main() {
     odds::MatrixVec mtx = odds::gen_rand_matrix(MATRIX_SIZE);
+
     odds::MatrixPlot plt(mtx);
     odds::print_matrix(mtx);
     plt.run();
