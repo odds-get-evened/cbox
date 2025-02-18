@@ -1,4 +1,4 @@
-APP_NAME=data_paths
+APP_NAME=scratch_one
 VERSION=0.0.1
 # C++ compiler
 COMPILER=g++
@@ -21,7 +21,7 @@ CFLAGS=-g -Wall -O0
 # -lkernel32	links in the kernel32 library
 # -lz		links in the zlib library
 # -lmlpack links in the mlpack library (machine learning library)
-LDFLAGS=-lstdc++ -lz -lglfw3 -lopengl32 -lgdi32 -larmadillo -lglew32 -LC:/Users/chris/github_clones/MITIE/mitielib -lmitie
+LDFLAGS=-lstdc++ -LC:/Users/chris/github_clones/MITIE/mitielib -lmitie -ldlib
 
 # in this section, you list files that are part of the project.
 # if you add/change names of source files, here is where you
@@ -46,4 +46,4 @@ run:
 .PHONY: clean
 
 clean:
-	@rm -f $(TARGET) $(OBJECTS)
+	@rm -f $(OBJECTS) ./dist/*
