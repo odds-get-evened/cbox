@@ -1,9 +1,9 @@
-APP_NAME=data_paths
+APP_NAME=mlpick
 VERSION=0.0.1
 # C++ compiler
 COMPILER=g++
 # include paths
-INC_PATHS= -I. -I./inc -IC:/msys64/mingw64/include -IC:/Users/chris/github_clones/MITIE/mitielib/include
+INC_PATHS= -I. -I./inc -IC:/msys64/mingw64/include
 
 # the CFLAGS variable sets the compile flags for COMPILER
 # -g		compile with debig info.
@@ -20,8 +20,7 @@ CFLAGS=-g -Wall -O0
 # -luser32	links in the user32 library
 # -lkernel32	links in the kernel32 library
 # -lz		links in the zlib library
-# -lmlpack links in the mlpack library (machine learning library)
-LDFLAGS=-lstdc++ -lz -lglfw3 -lopengl32 -lgdi32 -larmadillo -lglew32 -LC:/Users/chris/github_clones/MITIE/mitielib -lmitie
+LDFLAGS=-lstdc++ -lz -larmadillo
 
 # in this section, you list files that are part of the project.
 # if you add/change names of source files, here is where you

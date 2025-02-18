@@ -7,6 +7,8 @@
 #include <cstdint>
 #include <random>
 #include <vector>
+#include <string>
+#include <sstream>
 #include <mlpack/core.hpp>
 #include <mlpack/methods/linear_regression/linear_regression.hpp>
 
@@ -28,10 +30,33 @@ void drawCircle(float centerX, float centerY, float radius) {
     glEnd();
 }
 
+const size_t MATRIX_SIZE = 32;
+
 namespace odds {
+    string uLong_to_hex(unsigned long num) {
+        stringstream ss;
+        ss << hex << num;
+
+        return ss.str();
+    }
+
     // define type for matrix of vectors
     // using MatrixVec = vector<vector<double>>;
     typedef vector<vector<double>> MatrixVec;
+
+    bool is_col_len_eq(const vector<vector<double>> &mtx) {
+        // 0 is equal to 0
+        if(mtx.empty()) return true;
+
+        // establish forst row length
+        size_t col_len = mtx[0].size();
+
+        for(const auto &row : mtx) {
+            if(row.size() != col_len) return false;
+        }
+
+        return true;
+    }
 
     MatrixVec gen_rand_matrix(size_t len) {
         // seed random number generator
@@ -72,9 +97,27 @@ namespace odds {
         return c;
     }
 
+    vector<uint8_t> double_to_uint8_vec(vector<double> &d) {
+        vector<uint8_t> u8v(d.size() * sizeof(double));
+
+        memcpy(u8v.data(), d.data(), u8v.size());
+
+        return u8v;
+    }
+
     LinearRegression train_model(const vector<vector<double>> &d) {
+        /*
+        ensures all inner vectors lengths are equal
+        so we can select anyone for column length in
+        training.
+        */
+        bool eq_cols = is_col_len_eq(d);
+        if(!eq_cols) exit(-1);
+
+        // since all are equal just grab column length from first row.
+        size_t n_cols = d[0].size();
         // create matrix from data
-        arma::mat X(d.size(), 2);
+        arma::mat X(d.size(), n_cols);
         // create vector from data
         arma::rowvec y(d.size());
 
@@ -90,16 +133,23 @@ namespace odds {
         return lr;
     }
 
+    /**
+     * @brief Predict new values using a trained linear regression model
+     * @param lr LinearRegression object
+     * @param len Number of new values to predict
+     */
     vector<vector<double>> predict_new_matrix(LinearRegression &lr, size_t len) {
+        // seed random number generator
         random_device rd;
         mt19937 gen(rd());
+        // pick random numbers between -1 and 1
         uniform_real_distribution<double> dist(-1.0, 1.0);
 
+        // create matrix to store new data
         vector<vector<double>> new_mtx(len, vector<double>(3));
 
         // fill matrix with random numbers
         arma::mat X(len, 2);
-
         for(size_t i=0; i<len; i++) {
             new_mtx[i][0] = dist(gen);
             new_mtx[i][1] = dist(gen);
@@ -107,9 +157,11 @@ namespace odds {
             X(i, 1) = new_mtx[i][1];
         }
 
+        // predict new values
         arma::rowvec predictions;
         lr.Predict(X, predictions);
 
+        // fill new matrix with predictions
         for(size_t i=0; i<len; i++) {
             new_mtx[i][2] = predictions(i);
         }
@@ -154,8 +206,9 @@ namespace odds {
                 plot->lastX = xpos;
                 plot->lastY = ypos;
 
-                plot->angleX += yoffset * 0.1f;
-                plot->angleY += xoffset * 0.1f;
+                const float dr = 0.2f;
+                plot->angleX += yoffset * dr;
+                plot->angleY += xoffset * dr;
             } else {
                 plot->firstMouse = true;        // reset firstMouse when button is released
             }
@@ -191,6 +244,7 @@ namespace odds {
             }
 
             glEnable(GL_DEPTH_TEST);
+            // glEnable(GL_COLOR_MATERIAL);
 
             glViewport(0, 0, 640, 480);
 
@@ -198,6 +252,74 @@ namespace odds {
             glLoadIdentity();
             glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
             glMatrixMode(GL_MODELVIEW);
+        }
+
+        void draw_plots() {
+            glPointSize(10.0f);
+
+            glBegin(GL_POINTS);
+            glColor3f(0.86f, 0.1f, 0.07f);
+            for(const auto &vec : matrix) {
+                glVertex3d(vec[0], vec[1], vec[2]);
+            }
+            glEnd();
+        }
+
+        void draw_line_arrow(float x1, float y1, float x2, float y2) {
+            float arrow_len = 0.1f;
+            // angle of the arrowhead
+            float arrow_angle = M_PI / 6;
+
+            float angle = atan2(y2 - y1, x2 - x1);
+
+            float x3 = x2 - arrow_len * cos(angle - arrow_angle);
+            float y3 = y2 - arrow_len * sin(angle - arrow_angle);
+
+            float x4 = x2 - arrow_len * cos(angle + arrow_angle);
+            float y4 = y2 - arrow_len * sin(angle + arrow_angle);
+
+            glBegin(GL_LINES);
+            glVertex2f(x1, y1);
+            glVertex2f(x2, y2);
+            glEnd();
+
+            glBegin(GL_TRIANGLES);
+            glVertex2f(x2, y2);
+            glVertex2f(x3, y3);
+            glVertex2f(x4, y4);
+            glEnd();
+        }
+
+        void draw_direction_lines() {
+            glLineWidth(1.0);
+            
+            for(size_t i=0; i<matrix.size(); i++) {
+                float x1 = matrix[i][0];
+                float y1 = matrix[i][1];
+                float z1 = matrix[i][2];
+                // cout << x1 << ", " << y1 << ", " << z1 << endl;
+
+                float x2, y2, z2;
+                // avoid segfault
+                if(i+1<matrix.size()) {
+                    x2 = matrix[i+1][0];
+                    y2 = matrix[i+1][1];
+                    z2 = matrix[i+1][2];
+                }
+
+                // draw the line
+                glBegin(GL_LINES);
+                glColor3f(0.08f, 0.86f, 0.07f);
+                glVertex3f(x1, y1, z1);
+                glVertex3f(x2, y2, z2);
+                glEnd();
+
+                // draw the directional arrow
+                float midX = (x1 + x2) / 2.0f;
+                float midY = (y1 + y2) / 2.0f;
+                float midZ = (z1 + z2) / 2.0f;
+                draw_line_arrow(midX, midY, x2, y2);
+            }
         }
 
         void run() {
@@ -211,14 +333,8 @@ namespace odds {
                 glRotatef(angleX, 1.0f, 0.0f, 0.0f);
                 glRotatef(angleY, 0.0f, 1.0f, 0.0f);
 
-                glPointSize(5.0f);
-                glColor3f(1.0f, 1.0f, 1.0f);
-
-                glBegin(GL_POINTS);
-                for(const auto &vec : matrix) {
-                    glVertex3d(vec[0], vec[1], vec[2]);
-                }
-                glEnd();
+                draw_plots();
+                draw_direction_lines();
 
                 glfwSwapBuffers(window);
                 glfwPollEvents();
@@ -230,13 +346,19 @@ namespace odds {
     };
 }
 
-
-
 int main() {
-    odds::MatrixVec mtx = odds::gen_rand_matrix(32);
+    odds::MatrixVec mtx = odds::gen_rand_matrix(MATRIX_SIZE);
+
     odds::MatrixPlot plt(mtx);
-    odds::print_matrix(mtx);
+    // odds::print_matrix(mtx);
     plt.run();
+
+    /*
+    vector<uint8_t> umtx = odds::double_to_uint8_vec(mtx.at(0));
+    uLong ch = odds::crc32_hash(umtx);
+    string chh = odds::uLong_to_hex(ch);
+    cout << chh << endl;
+    */
 
     return 0;
 }
